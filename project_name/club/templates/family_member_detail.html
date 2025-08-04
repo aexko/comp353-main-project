@@ -3,11 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <title>Family Member Details - MVC System</title>
+    <!-- Add Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
-<body>
-    <h1>Family Member Details</h1>
+<body class="container mt-5">
+    <h1 class="mb-4">Family Member Details</h1>
 
-    <table border="1">
+    <table class="table table-bordered">
         <tr><td><strong>Name:</strong></td><td>{{ family_member.first_name }} {{ family_member.last_name }}</td></tr>
         <tr><td><strong>Email:</strong></td><td>{{ family_member.email_address }}</td></tr>
         <tr><td><strong>Phone:</strong></td><td>{{ family_member.telephone_number }}</td></tr>
@@ -19,10 +21,10 @@
     </table>
 
     <h3>Secondary Contacts</h3>
-    <a href="{% url 'secondary_family_member_create' family_member.pk %}">Add Secondary Contact</a>
+    <a href="{% url 'secondary_family_member_create' family_member.pk %}" class="btn btn-success mb-3">Add Secondary Contact</a>
 
-    <table border="1">
-        <thead>
+    <table class="table table-bordered">
+        <thead class="table-dark">
             <tr>
                 <th>Name</th>
                 <th>Phone</th>
@@ -37,8 +39,8 @@
                     <td>{{ secondary.telephone_number }}</td>
                     <td>{{ secondary.relationship }}</td>
                     <td>
-                        <a href="{% url 'secondary_family_member_edit' secondary.pk %}">Edit</a> |
-                        <a href="{% url 'secondary_family_member_delete' secondary.pk %}">Delete</a>
+                        <a href="{% url 'secondary_family_member_edit' secondary.pk %}" class="btn btn-warning btn-sm">Edit</a>
+                        <a href="{% url 'secondary_family_member_delete' secondary.pk %}" class="btn btn-danger btn-sm">Delete</a>
                     </td>
                 </tr>
             {% empty %}
@@ -50,8 +52,8 @@
     </table>
 
     <h3>Associated Club Members</h3>
-    <table border="1">
-        <thead>
+    <table class="table table-bordered">
+        <thead class="table-dark">
             <tr>
                 <th>Member Name</th>
                 <th>Relationship</th>
@@ -76,8 +78,11 @@
     </table>
 
     <br>
-    <a href="{% url 'family_member_edit' family_member.pk %}">Edit</a> |
-    <a href="{% url 'family_member_delete' family_member.pk %}">Delete</a> |
-    <a href="{% url 'family_member_list' %}">Back to List</a>
+    <a href="{% url 'family_member_edit' family_member.pk %}" class="btn btn-primary">Edit</a>
+    <a href="{% url 'family_member_delete' family_member.pk %}" class="btn btn-danger">Delete</a>
+    <a href="{% url 'family_member_list' %}" class="btn btn-secondary">Back to List</a>
+
+    <!-- Add Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

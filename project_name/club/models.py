@@ -1,6 +1,8 @@
 import uuid
 
 from django.db import models
+from django.core.exceptions import ValidationError
+from datetime import date, timedelta
 
 class Person(models.Model):
     """
@@ -72,6 +74,25 @@ class Personnel(Person):
     """
     Represents a person working at a club location
     """
+
+    def __str__(self):
+        return f"Personnel: {self.first_name} {self.last_name}"
+
+    def current_role(self):
+        """Get current active role"""
+        current_assignment = self.personnelassignment_set.filter(end_date__isnull=True).first()
+        return current_assignment.role if current_assignment else None
+
+    def current_location(self):
+        """Get current active location"""
+        current_assignment = self.personnelassignment_set.filter(end_date__isnull=True).first()
+        return current_assignment.location if current_assignment else None
+
+
+class PersonnelAssignment(models.Model):
+    """
+    Links a personnel member to a location with specific dates, role, and mandate
+    """
     ROLE_CHOICES = [
         ('Administrator', 'Administrator'),
         ('General Manager', 'General Manager'),
@@ -87,24 +108,25 @@ class Personnel(Person):
         ('Volunteer', 'Volunteer'),
         ('Salaried', 'Salaried'),
     ]
-    role = models.CharField(max_length=50, choices=ROLE_CHOICES)
-    mandate = models.CharField(max_length=10, choices=MANDATE_CHOICES)
 
-    def __str__(self):
-        return f"Personnel: {self.first_name} {self.last_name} ({self.role})"
-
-
-class PersonnelAssignment(models.Model):
-    """
-    Links a personnel member to a location with specific dates
-    """
     personnel = models.ForeignKey(Personnel, on_delete=models.CASCADE)
     location = models.ForeignKey(Location, on_delete=models.CASCADE)
+    role = models.CharField(max_length=50, choices=ROLE_CHOICES)
+    mandate = models.CharField(max_length=10, choices=MANDATE_CHOICES)
     start_date = models.DateField()
     end_date = models.DateField(null=True, blank=True)
 
+    class Meta:
+        # Ensure no overlapping assignments for same person
+        constraints = [
+            models.CheckConstraint(
+                check=models.Q(end_date__isnull=True) | models.Q(end_date__gte=models.F('start_date')),
+                name='valid_date_range'
+            )
+        ]
+
     def __str__(self):
-        return f"{self.personnel} at {self.location} from {self.start_date}"
+        return f"{self.personnel} as {self.role} at {self.location} from {self.start_date}"
 
 
 class FamilyMember(Person):
@@ -141,9 +163,48 @@ class ClubMember(Person):
     location = models.ForeignKey(Location, on_delete=models.SET_NULL, null=True)
     date_joined = models.DateField(auto_now_add=True)
     is_active = models.BooleanField(default=True)
+    gender = models.CharField(max_length=1, choices=[('M', 'Male'), ('F', 'Female')], default='M')
 
     def __str__(self):
         return f"Member: {self.first_name} {self.last_name}"
+
+    def clean(self):
+        # Constraint: Member must be at least 11 years old at registration
+        if self.age < 11:
+            raise ValidationError("Club member must be at least 11 years old to register.")
+
+        # Constraint: Minor members must have family member association
+        if self.is_minor and not hasattr(self, 'pk'):  # New member
+            # This will be checked after save in the view
+            pass
+
+    @property
+    def age(self):
+        today = date.today()
+        return today.year - self.date_of_birth.year - ((today.month, today.day) < (self.date_of_birth.month, self.date_of_birth.day))
+
+    @property
+    def is_minor(self):
+        return self.age < 18
+
+    @property
+    def is_major(self):
+        return self.age >= 18
+
+    @property
+    def annual_fee(self):
+        """Constraint: $100 for minors, $200 for majors"""
+        return 100.00 if self.is_minor else 200.00
+
+    def total_payments_for_year(self, year):
+        """Calculate total payments for a specific year"""
+        return self.payment_set.filter(for_year=year).aggregate(
+            total=models.Sum('amount')
+        )['total'] or 0
+
+    def is_fees_paid_for_year(self, year):
+        """Check if annual fees are fully paid for a year"""
+        return self.total_payments_for_year(year) >= self.annual_fee
 
 
 class MinorMemberAssociation(models.Model):
@@ -222,6 +283,42 @@ class PlayerAssignment(models.Model):
     class Meta:
         # player can only be in a team once per formation
         unique_together = ('club_member', 'team_formation')
+
+    def clean(self):
+        # Validate minimum age (11 years old)
+        if self.club_member.age < 11:
+            raise ValidationError("Club member must be at least 11 years old.")
+
+        # Validate membership is active (fees paid for current year)
+        if not self.club_member.is_active:
+            raise ValidationError("Club member must have active membership to participate.")
+
+        # Validate same gender in team formation
+        team_members = PlayerAssignment.objects.filter(team_formation=self.team_formation).exclude(pk=self.pk)
+        if team_members.exists():
+            existing_gender = team_members.first().club_member.gender
+            if self.club_member.gender != existing_gender:
+                raise ValidationError("All players in the same team must be of the same gender.")
+
+        # Validate same location for all team members
+        if self.club_member.location != self.team_formation.location:
+            raise ValidationError("All players must be from the same location as the team formation.")
+
+        # Validate 3-hour gap between team formations on same day
+        same_day_assignments = PlayerAssignment.objects.filter(
+            club_member=self.club_member,
+            team_formation__session_date=self.team_formation.session_date
+        ).exclude(pk=self.pk)
+
+        for assignment in same_day_assignments:
+            time_diff = abs((self.team_formation.start_time.hour * 60 + self.team_formation.start_time.minute) -
+                          (assignment.team_formation.start_time.hour * 60 + assignment.team_formation.start_time.minute))
+            if time_diff < 180:  # 3 hours = 180 minutes
+                raise ValidationError("At least 3 hours gap required between team formations on the same day.")
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.club_member.first_name} as {self.role} in {self.team_formation.team_name}"

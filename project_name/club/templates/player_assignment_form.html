@@ -2,43 +2,50 @@
 <html>
 <head>
     <title>Add Player to {{ formation.team_name }}</title>
+    <!-- Add Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
-    <h1>Add Player to Team Formation</h1>
+    <div class="container mt-5">
+        <h1 class="mb-4">Add Player to Team Formation</h1>
 
-    <div>
-        <h3>{{ formation.team_name }}</h3>
-        <p><strong>Date:</strong> {{ formation.session_date }}</p>
-        <p><strong>Time:</strong> {{ formation.start_time }}</p>
-        <p><strong>Type:</strong> {% if formation.is_game %}Game{% else %}Training{% endif %}</p>
-        <p><strong>Current Players:</strong> {{ formation.players.count }}</p>
+        <div class="mb-4">
+            <h3>{{ formation.team_name }}</h3>
+            <p><strong>Date:</strong> {{ formation.session_date }}</p>
+            <p><strong>Time:</strong> {{ formation.start_time }}</p>
+            <p><strong>Type:</strong> {% if formation.is_game %}Game{% else %}Training{% endif %}</p>
+            <p><strong>Current Players:</strong> {{ formation.players.count }}</p>
+        </div>
+
+        <form method="post" class="needs-validation" novalidate>
+            {% csrf_token %}
+
+            <div class="mb-3">
+                <label for="{{ form.club_member.id_for_label }}" class="form-label">Select Player:</label>
+                {{ form.club_member }}
+                {% if form.club_member.errors %}
+                    <div class="text-danger">{{ form.club_member.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="mb-3">
+                <label for="{{ form.role.id_for_label }}" class="form-label">Player Role:</label>
+                {{ form.role }}
+                {% if form.role.errors %}
+                    <div class="text-danger">{{ form.role.errors }}</div>
+                {% endif %}
+            </div>
+
+            {% if form.non_field_errors %}
+                <div class="text-danger">{{ form.non_field_errors }}</div>
+            {% endif %}
+
+            <button type="submit" class="btn btn-primary">Add Player</button>
+            <a href="{% url 'team_formation_detail' formation.pk %}" class="btn btn-secondary">Cancel</a>
+        </form>
     </div>
 
-    <form method="post">
-        {% csrf_token %}
-
-        <div>
-            <label for="{{ form.club_member.id_for_label }}">Select Player:</label>
-            {{ form.club_member }}
-            {% if form.club_member.errors %}
-                <div>{{ form.club_member.errors }}</div>
-            {% endif %}
-        </div>
-
-        <div>
-            <label for="{{ form.role.id_for_label }}">Player Role:</label>
-            {{ form.role }}
-            {% if form.role.errors %}
-                <div>{{ form.role.errors }}</div>
-            {% endif %}
-        </div>
-
-        {% if form.non_field_errors %}
-            <div>{{ form.non_field_errors }}</div>
-        {% endif %}
-
-        <button type="submit">Add Player</button>
-        <a href="{% url 'team_formation_detail' formation.pk %}">Cancel</a>
-    </form>
+    <!-- Add Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
