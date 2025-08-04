@@ -111,17 +111,21 @@ class PersonnelAssignment(models.Model):
 
     personnel = models.ForeignKey(Personnel, on_delete=models.CASCADE)
     location = models.ForeignKey(Location, on_delete=models.CASCADE)
-    role = models.CharField(max_length=50, choices=ROLE_CHOICES)
-    mandate = models.CharField(max_length=10, choices=MANDATE_CHOICES)
+    role = models.CharField(max_length=50, choices=ROLE_CHOICES, default='Other')
+    mandate = models.CharField(max_length=10, choices=MANDATE_CHOICES, default='Volunteer')
     start_date = models.DateField()
     end_date = models.DateField(null=True, blank=True)
 
     class Meta:
-        # Ensure no overlapping assignments for same person
+        db_table = 'club_personnelassignment'
         constraints = [
             models.CheckConstraint(
                 check=models.Q(end_date__isnull=True) | models.Q(end_date__gte=models.F('start_date')),
                 name='valid_date_range'
+            ),
+            models.UniqueConstraint(
+                fields=['personnel', 'start_date'],
+                name='unique_personnel_start_date'
             )
         ]
 
@@ -156,14 +160,21 @@ class ClubMember(Person):
     """
     Represents a club member who can be a minor or an adult
     """
-    membership_number = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
+    membership_number = models.CharField(max_length=36, unique=True, editable=False)
     height = models.DecimalField(max_digits=5, decimal_places=2)
     weight = models.DecimalField(max_digits=5, decimal_places=2)
-    hobbies = models.ManyToManyField(Hobby, blank=True)
+    hobbies = models.ManyToManyField(Hobby, blank=True, through='ClubMemberHobby')
     location = models.ForeignKey(Location, on_delete=models.SET_NULL, null=True)
     date_joined = models.DateField(auto_now_add=True)
-    is_active = models.BooleanField(default=True)
     gender = models.CharField(max_length=1, choices=[('M', 'Male'), ('F', 'Female')], default='M')
+
+    class Meta:
+        db_table = 'club_clubmember'
+
+    def save(self, *args, **kwargs):
+        if not self.membership_number:
+            self.membership_number = str(uuid.uuid4())
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"Member: {self.first_name} {self.last_name}"
@@ -172,11 +183,6 @@ class ClubMember(Person):
         # Constraint: Member must be at least 11 years old at registration
         if self.age < 11:
             raise ValidationError("Club member must be at least 11 years old to register.")
-
-        # Constraint: Minor members must have family member association
-        if self.is_minor and not hasattr(self, 'pk'):  # New member
-            # This will be checked after save in the view
-            pass
 
     @property
     def age(self):
@@ -207,13 +213,25 @@ class ClubMember(Person):
         return self.total_payments_for_year(year) >= self.annual_fee
 
 
+class ClubMemberHobby(models.Model):
+    """
+    Through model for ClubMember and Hobby many-to-many relationship
+    """
+    clubmember = models.ForeignKey(ClubMember, on_delete=models.CASCADE)
+    hobby = models.ForeignKey(Hobby, on_delete=models.CASCADE)
+
+    class Meta:
+        db_table = 'club_clubmember_hobbies'
+        unique_together = ('clubmember', 'hobby')
+
+
 class MinorMemberAssociation(models.Model):
     """
     Links a minor club member to a family member and defines their relationship
     """
     RELATIONSHIP_CHOICES = [
-        ('Father', 'Father'), ('Mother', 'Mother'), ('Grandfather', 'Grandfather'),
-        ('Grandmother', 'Grandmother'), ('Tutor', 'Tutor'), ('Partner', 'Partner'),
+        ('Father', 'Father'), ('Mother', 'Mother'), ('Grand-father', 'Grand-father'),
+        ('Grand-mother', 'Grand-mother'), ('Tutor', 'Tutor'), ('Partner', 'Partner'),
         ('Friend', 'Friend'), ('Other', 'Other'),
     ]
     minor_member = models.ForeignKey(ClubMember, on_delete=models.CASCADE)
@@ -221,6 +239,19 @@ class MinorMemberAssociation(models.Model):
     relationship = models.CharField(max_length=20, choices=RELATIONSHIP_CHOICES)
     start_date = models.DateField()
     end_date = models.DateField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'club_minormemberassociation'
+        constraints = [
+            models.CheckConstraint(
+                check=models.Q(end_date__isnull=True) | models.Q(end_date__gte=models.F('start_date')),
+                name='valid_date_range_minor'
+            ),
+            models.UniqueConstraint(
+                fields=['minor_member', 'start_date'],
+                name='unique_minor_start_date'
+            )
+        ]
 
     def __str__(self):
         return f"{self.minor_member.first_name} ({self.relationship}) with {self.family_member.first_name}"
@@ -270,28 +301,29 @@ class PlayerAssignment(models.Model):
     """
     PLAYER_ROLES = [
         ('Setter', 'Setter'),
-        ('Outside Hitter', 'Outside Hitter'),
-        ('Opposite Hitter', 'Opposite Hitter'),
-        ('Middle Blocker', 'Middle Blocker'),
-        ('Defensive Specialist', 'Defensive Specialist'),
+        ('Outside hitter', 'Outside hitter'),
+        ('Opposite hitter', 'Opposite hitter'),
+        ('Middle blocker', 'Middle blocker'),
+        ('Defensive specialist', 'Defensive specialist'),
         ('Libero', 'Libero'),
     ]
     club_member = models.ForeignKey(ClubMember, on_delete=models.CASCADE)
     team_formation = models.ForeignKey(TeamFormation, on_delete=models.CASCADE, related_name='players')
-    role = models.CharField(max_length=20, choices=PLAYER_ROLES)
+    role = models.CharField(max_length=50, choices=PLAYER_ROLES)
 
     class Meta:
-        # player can only be in a team once per formation
-        unique_together = ('club_member', 'team_formation')
+        db_table = 'club_playerassignment'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['club_member', 'team_formation'],
+                name='unique_member_formation'
+            )
+        ]
 
     def clean(self):
         # Validate minimum age (11 years old)
         if self.club_member.age < 11:
             raise ValidationError("Club member must be at least 11 years old.")
-
-        # Validate membership is active (fees paid for current year)
-        if not self.club_member.is_active:
-            raise ValidationError("Club member must have active membership to participate.")
 
         # Validate same gender in team formation
         team_members = PlayerAssignment.objects.filter(team_formation=self.team_formation).exclude(pk=self.pk)
@@ -313,7 +345,7 @@ class PlayerAssignment(models.Model):
         for assignment in same_day_assignments:
             time_diff = abs((self.team_formation.start_time.hour * 60 + self.team_formation.start_time.minute) -
                           (assignment.team_formation.start_time.hour * 60 + assignment.team_formation.start_time.minute))
-            if time_diff < 180:  # 3 hours = 180 minutes
+            if time_diff < 180:
                 raise ValidationError("At least 3 hours gap required between team formations on the same day.")
 
     def save(self, *args, **kwargs):

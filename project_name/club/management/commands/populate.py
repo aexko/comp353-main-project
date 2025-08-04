@@ -42,7 +42,7 @@ class Command(BaseCommand):
         hobbies = ['Swimming', 'Tennis', 'Basketball', 'Volleyball', 'Soccer', 'Yoga']
         hobby_objects = [Hobby.objects.get_or_create(name=hobby_name)[0] for hobby_name in hobbies]
 
-        # Create personnel
+        # Create personnel without mandate and role
         coach, created = Personnel.objects.get_or_create(
             email_address='john.smith@club.com',
             defaults={
@@ -55,9 +55,7 @@ class Command(BaseCommand):
                 'address': '789 Coach St',
                 'city': 'Montreal',
                 'province': 'Quebec',
-                'postal_code': 'H3C 3C3',
-                'role': 'Coach',
-                'mandate': 'Salaried'
+                'postal_code': 'H3C 3C3'
             }
         )
 
@@ -73,13 +71,10 @@ class Command(BaseCommand):
                 'address': '321 Manager Ave',
                 'city': 'Montreal',
                 'province': 'Quebec',
-                'postal_code': 'H4D 4D4',
-                'role': 'General Manager',
-                'mandate': 'Salaried'
+                'postal_code': 'H4D 4D4'
             }
         )
 
-        # Create additional personnel
         assistant_coach, created = Personnel.objects.get_or_create(
             email_address='assistant.coach@club.com',
             defaults={
@@ -92,9 +87,7 @@ class Command(BaseCommand):
                 'address': '123 Assistant St',
                 'city': 'Montreal',
                 'province': 'Quebec',
-                'postal_code': 'H3C 3C3',
-                'role': 'Assistant Coach',
-                'mandate': 'Volunteer'
+                'postal_code': 'H3C 3C3'
             }
         )
 
@@ -110,35 +103,49 @@ class Command(BaseCommand):
                 'address': '456 Treasurer Ave',
                 'city': 'Montreal',
                 'province': 'Quebec',
-                'postal_code': 'H4D 4D4',
-                'role': 'Treasurer',
-                'mandate': 'Salaried'
+                'postal_code': 'H4D 4D4'
             }
         )
 
-        # Assign personnel to locations
+        # Assign mandate and role using PersonnelAssignment
         PersonnelAssignment.objects.get_or_create(
             personnel=coach,
             location=head_location,
-            defaults={'start_date': date(2023, 1, 1)}
+            defaults={
+                'role': 'Coach',
+                'mandate': 'Salaried',
+                'start_date': date(2023, 1, 1)
+            }
         )
 
         PersonnelAssignment.objects.get_or_create(
             personnel=manager,
             location=head_location,
-            defaults={'start_date': date(2022, 6, 1)}
+            defaults={
+                'role': 'General Manager',
+                'mandate': 'Salaried',
+                'start_date': date(2022, 6, 1)
+            }
         )
 
         PersonnelAssignment.objects.get_or_create(
             personnel=assistant_coach,
             location=branch_location,
-            defaults={'start_date': date(2023, 2, 1)}
+            defaults={
+                'role': 'Assistant Coach',
+                'mandate': 'Volunteer',
+                'start_date': date(2023, 2, 1)
+            }
         )
 
         PersonnelAssignment.objects.get_or_create(
             personnel=treasurer,
             location=head_location,
-            defaults={'start_date': date(2023, 3, 1)}
+            defaults={
+                'role': 'Treasurer',
+                'mandate': 'Salaried',
+                'start_date': date(2023, 3, 1)
+            }
         )
 
         # Create family members
@@ -179,12 +186,68 @@ class Command(BaseCommand):
             }
         )
 
+        # Create additional club members
+        adult_member2, created = ClubMember.objects.get_or_create(
+            email_address='jane.doe@email.com',
+            defaults={
+                'first_name': 'Jane',
+                'last_name': 'Doe',
+                'date_of_birth': date(1995, 6, 20),
+                'social_security_number': '888-44-5555',
+                'medicare_card_number': 'DOEJ888444',
+                'telephone_number': '514-555-3002',
+                'address': '444 Member Rd',
+                'city': 'Montreal',
+                'province': 'Quebec',
+                'postal_code': 'H7G 7G8',
+                'height': 165.0,
+                'weight': 60.0,
+                'location': branch_location
+            }
+        )
+
+        minor_member1, created = ClubMember.objects.get_or_create(
+            email_address='child.member@email.com',
+            defaults={
+                'first_name': 'Child',
+                'last_name': 'Member',
+                'date_of_birth': date(2010, 5, 15),
+                'social_security_number': '999-55-6666',
+                'medicare_card_number': 'MEMC999555',
+                'telephone_number': '514-555-3003',
+                'address': '555 Member Rd',
+                'city': 'Montreal',
+                'province': 'Quebec',
+                'postal_code': 'H7G 7G9',
+                'height': 140.0,
+                'weight': 40.0,
+                'location': branch_location
+            }
+        )
+
         # Create payments
         Payment.objects.create(
             club_member=adult_member1,
             payment_date=date(2024, 1, 15),
             amount=150.00,
             method_of_payment='Credit',
+            for_year=2024
+        )
+
+        # Create additional payments
+        Payment.objects.create(
+            club_member=adult_member2,
+            payment_date=date(2024, 2, 10),
+            amount=200.00,
+            method_of_payment='Debit',
+            for_year=2024
+        )
+
+        Payment.objects.create(
+            club_member=minor_member1,
+            payment_date=date(2024, 3, 5),
+            amount=100.00,
+            method_of_payment='Cash',
             for_year=2024
         )
 
@@ -199,11 +262,35 @@ class Command(BaseCommand):
             is_game=False
         )
 
+        # Create additional team formations
+        game_session = TeamFormation.objects.create(
+            location=branch_location,
+            team_name='Junior Soccer Team',
+            head_coach=assistant_coach,
+            session_date=date.today() + timedelta(days=10),
+            start_time='16:00',
+            session_address='456 Athletic Blvd, Montreal',
+            is_game=True
+        )
+
         # Create player assignments
         PlayerAssignment.objects.create(
             club_member=adult_member1,
             team_formation=training_session,
             role='Setter'
+        )
+
+        # Create additional player assignments
+        PlayerAssignment.objects.create(
+            club_member=adult_member2,
+            team_formation=game_session,
+            role='Outside Hitter'
+        )
+
+        PlayerAssignment.objects.create(
+            club_member=minor_member1,
+            team_formation=game_session,
+            role='Libero'
         )
 
         # Create log entries
@@ -212,6 +299,21 @@ class Command(BaseCommand):
             receiver='alex.wilson@email.com',
             subject='Welcome to the Club',
             body_snippet='Welcome Alex! We are excited to have you as a new member...'
+        )
+
+        # Create additional log entries
+        Log.objects.create(
+            sender='admin@club.com',
+            receiver='jane.doe@email.com',
+            subject='Welcome to the Club',
+            body_snippet='Welcome Jane! We are thrilled to have you join us...'
+        )
+
+        Log.objects.create(
+            sender='admin@club.com',
+            receiver='child.member@email.com',
+            subject='Welcome to the Club',
+            body_snippet='Welcome Child! We are excited to see your progress...'
         )
 
         # Create inactive members
