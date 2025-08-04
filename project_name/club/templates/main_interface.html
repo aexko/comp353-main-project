@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Montréal Volleyball Club</title>
+</head>
+<body>
+    <h1>Montréal Volleyball Club System</h1>
+
+    <form method="get" action="{% url 'location_report' %}">
+      <button type="submit">Get Location Report</button>
+    </form>
+    <br>
+
+    {% if location_data %}
+        <h2>Location Details</h2>
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>Location Name</th>
+                    <th>Type</th>
+                    <th>Max Capacity</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in location_data %}
+                    <tr>
+                        <td>{{ row.name }}</td>
+                        <td>{{ row.type }}</td>
+                        <td>{{ row.max_capacity }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+
+</body>
+</html>
