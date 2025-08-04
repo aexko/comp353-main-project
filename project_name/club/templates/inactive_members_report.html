@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Inactive Members Report</title>
+</head>
+<body>
+<h1>Inactive Members Report</h1>
+
+{% if inactive_members %}
+    <ul>
+        {% for member in inactive_members %}
+            <li>{{ member.first_name }} {{ member.last_name }} - Joined: {{ member.date_joined }}</li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>No inactive members found.</p>
+{% endif %}
+
+</body>
+</html>

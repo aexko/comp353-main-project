@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Delete Secondary Family Member - MVC System</title>
+</head>
+<body>
+    <h1>Delete Secondary Family Member</h1>
+
+    <p>Are you sure you want to delete <strong>{{ secondary.first_name }} {{ secondary.last_name }}</strong> as a secondary contact?</p>
+
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit">Yes, Delete</button>
+        <a href="{% url 'family_member_detail' secondary.primary_family_member.pk %}">Cancel</a>
+    </form>
+</body>
+</html>

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Player to {{ formation.team_name }}</title>
+</head>
+<body>
+    <h1>Add Player to Team Formation</h1>
+
+    <div>
+        <h3>{{ formation.team_name }}</h3>
+        <p><strong>Date:</strong> {{ formation.session_date }}</p>
+        <p><strong>Time:</strong> {{ formation.start_time }}</p>
+        <p><strong>Type:</strong> {% if formation.is_game %}Game{% else %}Training{% endif %}</p>
+        <p><strong>Current Players:</strong> {{ formation.players.count }}</p>
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <div>
+            <label for="{{ form.club_member.id_for_label }}">Select Player:</label>
+            {{ form.club_member }}
+            {% if form.club_member.errors %}
+                <div>{{ form.club_member.errors }}</div>
+            {% endif %}
+        </div>
+
+        <div>
+            <label for="{{ form.role.id_for_label }}">Player Role:</label>
+            {{ form.role }}
+            {% if form.role.errors %}
+                <div>{{ form.role.errors }}</div>
+            {% endif %}
+        </div>
+
+        {% if form.non_field_errors %}
+            <div>{{ form.non_field_errors }}</div>
+        {% endif %}
+
+        <button type="submit">Add Player</button>
+        <a href="{% url 'team_formation_detail' formation.pk %}">Cancel</a>
+    </form>
+</body>
+</html>

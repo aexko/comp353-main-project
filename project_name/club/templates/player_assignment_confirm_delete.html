@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Remove Player from Team</title>
+</head>
+<body>
+    <h1>Remove Player from Team</h1>
+
+    <div>
+        <strong>Warning!</strong> This will remove the player from this team formation.
+    </div>
+
+    <div>
+        <h3>Player: {{ assignment.club_member.first_name }} {{ assignment.club_member.last_name }}</h3>
+        <p><strong>Role:</strong> {{ assignment.role }}</p>
+        <p><strong>Team:</strong> {{ assignment.team_formation.team_name }}</p>
+        <p><strong>Session Date:</strong> {{ assignment.team_formation.session_date }}</p>
+        <p><strong>Session Time:</strong> {{ assignment.team_formation.start_time }}</p>
+    </div>
+
+    <p>Are you sure you want to remove this player from the team formation?</p>
+
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit">Yes, Remove Player</button>
+        <a href="{% url 'team_formation_detail' assignment.team_formation.pk %}">Cancel</a>
+    </form>
+</body>
+</html>

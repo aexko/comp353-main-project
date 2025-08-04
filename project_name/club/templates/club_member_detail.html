@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Club Member Details - MVC System</title>
+</head>
+<body>
+    <h1>Club Member Details</h1>
+
+    <table border="1" style="border-collapse: collapse; width: 100%;">
+        <tr><td><strong>Membership Number:</strong></td><td>{{ member.membership_number }}</td></tr>
+        <tr><td><strong>Name:</strong></td><td>{{ member.first_name }} {{ member.last_name }}</td></tr>
+        <tr><td><strong>Age:</strong></td><td>{{ age }} ({% if is_minor %}Minor{% else %}Major{% endif %})</td></tr>
+        <tr><td><strong>Date of Birth:</strong></td><td>{{ member.date_of_birth }}</td></tr>
+        <tr><td><strong>Email:</strong></td><td>{{ member.email_address }}</td></tr>
+        <tr><td><strong>Phone:</strong></td><td>{{ member.telephone_number }}</td></tr>
+        <tr><td><strong>Address:</strong></td><td>{{ member.address }}, {{ member.city }}, {{ member.province }} {{ member.postal_code }}</td></tr>
+        <tr><td><strong>Height:</strong></td><td>{{ member.height }} cm</td></tr>
+        <tr><td><strong>Weight:</strong></td><td>{{ member.weight }} kg</td></tr>
+        <tr><td><strong>Location:</strong></td><td>{{ member.location.name|default:"No Location" }}</td></tr>
+        <tr><td><strong>Date Joined:</strong></td><td>{{ member.date_joined }}</td></tr>
+        <tr><td><strong>SSN:</strong></td><td>{{ member.social_security_number }}</td></tr>
+        <tr><td><strong>Medicare:</strong></td><td>{{ member.medicare_card_number }}</td></tr>
+    </table>
+
+    <h3>Hobbies</h3>
+    <ul>
+        {% for hobby in member.hobbies.all %}
+            <li>{{ hobby.name }}</li>
+        {% empty %}
+            <li>No hobbies listed</li>
+        {% endfor %}
+    </ul>
+
+    <h3>Family Associations</h3>
+    <table border="1" style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+        <thead>
+            <tr>
+                <th>Family Member</th>
+                <th>Relationship</th>
+                <th>Start Date</th>
+                <th>End Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for association in family_associations %}
+                <tr>
+                    <td>{{ association.family_member.first_name }} {{ association.family_member.last_name }}</td>
+                    <td>{{ association.relationship }}</td>
+                    <td>{{ association.start_date }}</td>
+                    <td>{{ association.end_date|default:"Active" }}</td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="4">No family associations.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h3>Payment History</h3>
+    <table border="1" style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+        <thead>
+            <tr>
+                <th>Payment Date</th>
+                <th>Amount</th>
+                <th>Method</th>
+                <th>For Year</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for payment in payments %}
+                <tr>
+                    <td>{{ payment.payment_date }}</td>
+                    <td>${{ payment.amount }}</td>
+                    <td>{{ payment.method_of_payment }}</td>
+                    <td>{{ payment.for_year }}</td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="4">No payments recorded.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h3>Team Assignments</h3>
+    <table border="1" style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+        <thead>
+            <tr>
+                <th>Team</th>
+                <th>Role</th>
+                <th>Session Date</th>
+                <th>Session Type</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for assignment in team_assignments %}
+                <tr>
+                    <td>{{ assignment.team_formation.team_name }}</td>
+                    <td>{{ assignment.role }}</td>
+                    <td>{{ assignment.team_formation.session_date }}</td>
+                    <td>{% if assignment.team_formation.is_game %}Game{% else %}Training{% endif %}</td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="4">No team assignments.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <br>
+    <a href="{% url 'club_member_edit' member.pk %}">Edit</a> |
+    <a href="{% url 'club_member_delete' member.pk %}" style="color: red;">Delete</a> |
+    <a href="{% url 'club_member_list' %}">Back to list</a>
+</body>
+</html>

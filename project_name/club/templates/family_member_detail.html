@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Family Member Details - MVC System</title>
+</head>
+<body>
+    <h1>Family Member Details</h1>
+
+    <table border="1">
+        <tr><td><strong>Name:</strong></td><td>{{ family_member.first_name }} {{ family_member.last_name }}</td></tr>
+        <tr><td><strong>Email:</strong></td><td>{{ family_member.email_address }}</td></tr>
+        <tr><td><strong>Phone:</strong></td><td>{{ family_member.telephone_number }}</td></tr>
+        <tr><td><strong>Date of Birth:</strong></td><td>{{ family_member.date_of_birth }}</td></tr>
+        <tr><td><strong>Address:</strong></td><td>{{ family_member.address }}, {{ family_member.city }}, {{ family_member.province }} {{ family_member.postal_code }}</td></tr>
+        <tr><td><strong>Location:</strong></td><td>{{ family_member.location.name|default:"No Location" }}</td></tr>
+        <tr><td><strong>SSN:</strong></td><td>{{ family_member.social_security_number }}</td></tr>
+        <tr><td><strong>Medicare:</strong></td><td>{{ family_member.medicare_card_number }}</td></tr>
+    </table>
+
+    <h3>Secondary Contacts</h3>
+    <a href="{% url 'secondary_family_member_create' family_member.pk %}">Add Secondary Contact</a>
+
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Phone</th>
+                <th>Relationship</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for secondary in secondary_contacts %}
+                <tr>
+                    <td>{{ secondary.first_name }} {{ secondary.last_name }}</td>
+                    <td>{{ secondary.telephone_number }}</td>
+                    <td>{{ secondary.relationship }}</td>
+                    <td>
+                        <a href="{% url 'secondary_family_member_edit' secondary.pk %}">Edit</a> |
+                        <a href="{% url 'secondary_family_member_delete' secondary.pk %}">Delete</a>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="4">No secondary contacts.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h3>Associated Club Members</h3>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Member Name</th>
+                <th>Relationship</th>
+                <th>Start Date</th>
+                <th>End Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for association in associated_members %}
+                <tr>
+                    <td>{{ association.minor_member.first_name }} {{ association.minor_member.last_name }}</td>
+                    <td>{{ association.relationship }}</td>
+                    <td>{{ association.start_date }}</td>
+                    <td>{{ association.end_date|default:"Active" }}</td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="4">No associated club members.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <br>
+    <a href="{% url 'family_member_edit' family_member.pk %}">Edit</a> |
+    <a href="{% url 'family_member_delete' family_member.pk %}">Delete</a> |
+    <a href="{% url 'family_member_list' %}">Back to List</a>
+</body>
+</html>

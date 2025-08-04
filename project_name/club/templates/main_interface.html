@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard</title>
+</head>
+<body>
+<h1>MVC</h1>
+<p>Welcome to the main dashboard</p>
+
+<h2>Club Member Management</h2>
+<ul>
+    <li><a href="{% url 'create_member' %}">Register a new club member</a></li>
+    <li><a href="{% url 'member_list' %}">View all club members</a></li>
+    <li><a href="{% url 'club_member_list' %}">Manage club members</a></li>
+</ul>
+
+<h2>Personnel Management</h2>
+<ul>
+    <li><a href="{% url 'personnel_list' %}">Manage personnel</a></li>
+    <li><a href="{% url 'personnel_create' %}">Add new personnel</a></li>
+</ul>
+
+<h2>Family Member Management</h2>
+<ul>
+    <li><a href="{% url 'family_member_list' %}">Manage family members</a></li>
+    <li><a href="{% url 'family_member_create' %}">Add new family member</a></li>
+</ul>
+
+<h2>Reports</h2>
+<ul>
+    <li><a href="{% url 'location_report' %}">Get a report on all locations</a></li>
+    <li><a href="{% url 'inactive_members_report' %}">Inactive members report</a></li>
+</ul>
+
+<h2>Team Management</h2>
+<ul>
+    <li><a href="{% url 'team_formation_list' %}">View all team formations</a></li>
+    <li><a href="{% url 'team_formation_create' %}">Create new team formation</a></li>
+</ul>
+
+{% if report_title %}
+<h3>{{ report_title }}</h3>
+{% if report_data %}
+<table border="1">
+    <thead>
+    <tr>
+        {% for header in report_headers %}
+        <th>{{ header }}</th>
+        {% endfor %}
+    </tr>
+    </thead>
+    <tbody>
+    {% for row in report_data %}
+    <tr>
+        {% for cell in row %}
+        <td>{{ cell }}</td>
+        {% endfor %}
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>No results found for this report.</p>
+{% endif %}
+{% endif %}
+
+{% if members %}
+<h3>All Club Members</h3>
+<table border="1">
+    <thead>
+    <tr>
+        <th>Membership Number</th>
+        <th>First Name</th>
+        <th>Last Name</th>
+        <th>Email</th>
+        <th>Location</th>
+        <th>Date Joined</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for member in members %}
+    <tr>
+        <td>{{ member.membership_number }}</td>
+        <td>{{ member.first_name }}</td>
+        <td>{{ member.last_name }}</td>
+        <td>{{ member.email_address }}</td>
+        <td>{{ member.location.name|default:"No Location" }}</td>
+        <td>{{ member.date_joined }}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endif %}
+
+{% if location_data %}
+<h3>All Locations</h3>
+<table border="1">
+    <thead>
+    <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Address</th>
+        <th>City</th>
+        <th>Phone</th>
+        <th>Max Capacity</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for location in location_data %}
+    <tr>
+        <td>{{ location.name }}</td>
+        <td>{{ location.type }}</td>
+        <td>{{ location.address }}</td>
+        <td>{{ location.city }}</td>
+        <td>{{ location.phone_number }}</td>
+        <td>{{ location.max_capacity }}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endif %}
+
+</body>
+</html>
