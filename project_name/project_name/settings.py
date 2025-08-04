@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'club',
+    'queries_asked',
 ]
 
 MIDDLEWARE = [
@@ -77,6 +78,13 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
+
+        # 'ENGINE': 'django.db.backends.mysql',
+        # 'NAME': 'your_database_name',
+        # 'USER': 'your_username',
+        # 'PASSWORD': 'your_password',
+        # 'HOST': 'localhost',  # Or the IP address of your MySQL server
+        # 'PORT': '3306',  # Default MySQL port
     }
 }
 
