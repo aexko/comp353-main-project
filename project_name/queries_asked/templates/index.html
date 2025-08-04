@@ -5,10 +5,6 @@
 </head>
 <body>
     <h1>Queries Asked</h1>
-    <button onclick="window.location.href='{% url 'queries_asked:makemigrations' %}'">Makemigrations</button>
-    <button onclick="window.location.href='{% url 'queries_asked:migrate' %}'">Migrate</button>
-    <button onclick="window.location.href='{% url 'queries_asked:createsuperuser' %}'">Create Superuser</button>
-    <button onclick="window.location.href='{% url 'queries_asked:raw_sql_query' %}'">Run SQL Query</button>
     <button onclick="window.location.href='{% url 'queries_asked:query' query_number=1 %}'">Query 1</button>
     <button onclick="window.location.href='{% url 'queries_asked:query' query_number=2 %}'">Query 2</button>
     <button onclick="window.location.href='{% url 'queries_asked:query' query_number=3 %}'">Query 3</button>
