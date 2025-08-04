@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Team Formations</title>
+</head>
+<body>
+    <h1>Team Formations</h1>
+
+    <a href="{% url 'team_formation_create' %}">Create New Team Formation</a>
+    <a href="{% url 'main_interface' %}">Back to Main</a>
+
+    {% if formations %}
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Team Name</th>
+                <th>Session Date</th>
+                <th>Start Time</th>
+                <th>Type</th>
+                <th>Location</th>
+                <th>Head Coach</th>
+                <th>Players</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for formation in formations %}
+            <tr>
+                <td>{{ formation.team_name }}</td>
+                <td>{{ formation.session_date }}</td>
+                <td>{{ formation.start_time }}</td>
+                <td>{% if formation.is_game %}Game{% else %}Training{% endif %}</td>
+                <td>{{ formation.location.name }}</td>
+                <td>{{ formation.head_coach.first_name }} {{ formation.head_coach.last_name }}</td>
+                <td>{{ formation.players.count }}</td>
+                <td>
+                    <a href="{% url 'team_formation_detail' formation.pk %}">View</a>
+                    <a href="{% url 'team_formation_edit' formation.pk %}">Edit</a>
+                    <a href="{% url 'team_formation_delete' formation.pk %}">Delete</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>No team formations found.</p>
+    {% endif %}
+</body>
+</html>

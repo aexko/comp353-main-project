@@ -140,6 +140,7 @@ class ClubMember(Person):
     hobbies = models.ManyToManyField(Hobby, blank=True)
     location = models.ForeignKey(Location, on_delete=models.SET_NULL, null=True)
     date_joined = models.DateField(auto_now_add=True)
+    is_active = models.BooleanField(default=True)
 
     def __str__(self):
         return f"Member: {self.first_name} {self.last_name}"

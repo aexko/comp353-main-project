@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ formation.team_name }} - Team Formation Details</title>
+</head>
+<body>
+    <h1>{{ formation.team_name }} - {% if formation.is_game %}Game{% else %}Training{% endif %}</h1>
+
+    <div>
+        <h3>Session Information</h3>
+        <p><strong>Date:</strong> {{ formation.session_date }}</p>
+        <p><strong>Time:</strong> {{ formation.start_time }}</p>
+        <p><strong>Location:</strong> {{ formation.location.name }}</p>
+        <p><strong>Address:</strong> {{ formation.session_address }}</p>
+        <p><strong>Head Coach:</strong> {{ formation.head_coach.first_name }} {{ formation.head_coach.last_name }}</p>
+        <p><strong>Type:</strong> {% if formation.is_game %}Game{% else %}Training Session{% endif %}</p>
+
+        {% if formation.is_game and formation.score_team1 is not None and formation.score_team2 is not None %}
+        <p><strong>Final Score:</strong> {{ formation.score_team1 }} - {{ formation.score_team2 }}</p>
+        {% endif %}
+    </div>
+
+    <div>
+        <a href="{% url 'team_formation_edit' formation.pk %}">Edit Formation</a>
+        <a href="{% url 'player_assignment_create' formation.pk %}">Add Player</a>
+        <a href="{% url 'team_formation_delete' formation.pk %}">Delete Formation</a>
+        <a href="{% url 'team_formation_list' %}">Back to List</a>
+    </div>
+
+    <h3>Team Roster ({{ players.count }} players)</h3>
+
+    {% if players %}
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Player Name</th>
+                <th>Role</th>
+                <th>Membership Number</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for player in players %}
+            <tr>
+                <td>{{ player.club_member.first_name }} {{ player.club_member.last_name }}</td>
+                <td>{{ player.role }}</td>
+                <td>{{ player.club_member.membership_number }}</td>
+                <td>
+                    <a href="{% url 'club_member_detail' player.club_member.pk %}">View Member</a>
+                    <a href="{% url 'player_assignment_delete' player.pk %}">Remove</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>No players assigned to this team formation yet.</p>
+    <a href="{% url 'player_assignment_create' formation.pk %}">Add First Player</a>
+    {% endif %}
+</body>
+</html>

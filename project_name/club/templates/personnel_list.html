@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Personnel List - MVC System</title>
+</head>
+<body>
+    <h1>Personnel Management</h1>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div>{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+
+    <a href="{% url 'personnel_create' %}">Add New Personnel</a>
+    <a href="{% url 'main_interface' %}">Back to Main</a>
+
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Role</th>
+                <th>Mandate</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for person in personnel_list %}
+                <tr>
+                    <td><a href="{% url 'personnel_detail' person.pk %}">{{ person.first_name }} {{ person.last_name }}</a></td>
+                    <td>{{ person.role }}</td>
+                    <td>{{ person.mandate }}</td>
+                    <td>{{ person.email_address }}</td>
+                    <td>{{ person.telephone_number }}</td>
+                    <td>
+                        <a href="{% url 'personnel_edit' person.pk %}">Edit</a> |
+                        <a href="{% url 'personnel_delete' person.pk %}">Delete</a>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="6">No personnel found.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

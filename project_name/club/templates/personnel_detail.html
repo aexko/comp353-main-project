@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Personnel Details - MVC System</title>
+</head>
+<body>
+    <h1>Personnel Details</h1>
+
+    <table border="1">
+        <tr><td><strong>Name:</strong></td><td>{{ personnel.first_name }} {{ personnel.last_name }}</td></tr>
+        <tr><td><strong>Role:</strong></td><td>{{ personnel.role }}</td></tr>
+        <tr><td><strong>Mandate:</strong></td><td>{{ personnel.mandate }}</td></tr>
+        <tr><td><strong>Date of Birth:</strong></td><td>{{ personnel.date_of_birth }}</td></tr>
+        <tr><td><strong>Email:</strong></td><td>{{ personnel.email_address }}</td></tr>
+        <tr><td><strong>Phone:</strong></td><td>{{ personnel.telephone_number }}</td></tr>
+        <tr><td><strong>Address:</strong></td><td>{{ personnel.address }}, {{ personnel.city }}, {{ personnel.province }} {{ personnel.postal_code }}</td></tr>
+        <tr><td><strong>SSN:</strong></td><td>{{ personnel.social_security_number }}</td></tr>
+        <tr><td><strong>Medicare:</strong></td><td>{{ personnel.medicare_card_number }}</td></tr>
+    </table>
+
+    <a href="{% url 'personnel_edit' personnel.pk %}">Edit</a> |
+    <a href="{% url 'personnel_delete' personnel.pk %}">Delete</a> |
+    <a href="{% url 'personnel_list' %}">Back to List</a>
+</body>
+</html>
