@@ -1,10 +1,10 @@
 from datetime import date, timedelta
 from decimal import Decimal
 
-from club.models import (
+from .models import (
     Location, Personnel, FamilyMember, SecondaryFamilyMember,
-    ClubMember, Payment, TeamFormation, PlayerAssignment,
-    MinorMemberAssociation, Hobby, Log
+    ClubMember, Payments, SessionTeams, PlayerAssignment,
+    FamilyRelationship, Hobbies, EmailLog
 )
 from django.test import TestCase, Client
 from django.urls import reverse
@@ -279,7 +279,7 @@ class BusinessLogicTestCase(TestCase):
         current_year = date.today().year
 
         # Test minor member payment
-        minor_payment = Payment.objects.create(
+        minor_payment = Payments.objects.create(
             club_member=self.minor_member,
             payment_date=date.today(),
             amount=Decimal('100.00'),
@@ -289,7 +289,7 @@ class BusinessLogicTestCase(TestCase):
         self.assertEqual(minor_payment.amount, Decimal('100.00'))
 
         # Test major member payment
-        major_payment = Payment.objects.create(
+        major_payment = Payments.objects.create(
             club_member=self.major_member,
             payment_date=date.today(),
             amount=Decimal('200.00'),
@@ -303,7 +303,7 @@ class BusinessLogicTestCase(TestCase):
         current_year = date.today().year
 
         # Minor member overpays (pays $150 instead of $100)
-        overpayment = Payment.objects.create(
+        overpayment = Payments.objects.create(
             club_member=self.minor_member,
             payment_date=date.today(),
             amount=Decimal('150.00'),  # $50 overpayment = donation
@@ -325,7 +325,7 @@ class BusinessLogicTestCase(TestCase):
         previous_year = current_year - 1
 
         # Create payment for current year only
-        Payment.objects.create(
+        Payments.objects.create(
             club_member=self.minor_member,
             payment_date=date.today(),
             amount=Decimal('100.00'),
@@ -334,14 +334,14 @@ class BusinessLogicTestCase(TestCase):
         )
 
         # No payment for previous year - member should be considered inactive
-        previous_year_payments = Payment.objects.filter(
+        previous_year_payments = Payments.objects.filter(
             club_member=self.minor_member,
             for_year=previous_year
         )
         self.assertEqual(previous_year_payments.count(), 0)
 
 
-class TeamFormationTestCase(TestCase):
+class SessionTeamsTestCase(TestCase):
     """Test team formation rules and constraints"""
 
     def setUp(self):
@@ -394,7 +394,7 @@ class TeamFormationTestCase(TestCase):
         tomorrow = date.today() + timedelta(days=1)
 
         # Create training session
-        training = TeamFormation.objects.create(
+        training = SessionTeams.objects.create(
             location=self.location,
             team_name='Test Training Team',
             head_coach=self.coach,
@@ -408,7 +408,7 @@ class TeamFormationTestCase(TestCase):
         self.assertIsNone(training.score_team2)
 
         # Create game session with scores
-        game = TeamFormation.objects.create(
+        game = SessionTeams.objects.create(
             location=self.location,
             team_name='Test Game Team',
             head_coach=self.coach,
@@ -427,7 +427,7 @@ class TeamFormationTestCase(TestCase):
         """Test assigning players to team formations"""
         tomorrow = date.today() + timedelta(days=1)
 
-        team_formation = TeamFormation.objects.create(
+        team_formation = SessionTeams.objects.create(
             location=self.location,
             team_name='Test Team',
             head_coach=self.coach,
@@ -452,7 +452,7 @@ class TeamFormationTestCase(TestCase):
         """Test that a player can only be assigned once per team formation"""
         tomorrow = date.today() + timedelta(days=1)
 
-        team_formation = TeamFormation.objects.create(
+        team_formation = SessionTeams.objects.create(
             location=self.location,
             team_name='Test Team',
             head_coach=self.coach,
@@ -544,7 +544,7 @@ class FamilyMemberTestCase(TestCase):
 
     def test_minor_member_family_association(self):
         """Test associating minor members with family members"""
-        association = MinorMemberAssociation.objects.create(
+        association = FamilyRelationship.objects.create(
             minor_member=self.minor_member,
             family_member=self.family_member,
             relationship='Father',
@@ -577,7 +577,7 @@ class FamilyMemberTestCase(TestCase):
         )
 
         # Associate first child
-        association1 = MinorMemberAssociation.objects.create(
+        association1 = FamilyRelationship.objects.create(
             minor_member=self.minor_member,
             family_member=self.family_member,
             relationship='Father',
@@ -585,7 +585,7 @@ class FamilyMemberTestCase(TestCase):
         )
 
         # Associate second child
-        association2 = MinorMemberAssociation.objects.create(
+        association2 = FamilyRelationship.objects.create(
             minor_member=child2,
             family_member=self.family_member,
             relationship='Father',
@@ -593,7 +593,7 @@ class FamilyMemberTestCase(TestCase):
         )
 
         # Both associations should exist
-        associations = MinorMemberAssociation.objects.filter(family_member=self.family_member)
+        associations = FamilyRelationship.objects.filter(family_member=self.family_member)
         self.assertEqual(associations.count(), 2)
 
 
@@ -784,7 +784,7 @@ class ReportingTestCase(TestCase):
         )
 
         # Create payment for active member only
-        Payment.objects.create(
+        Payments.objects.create(
             club_member=self.active_member,
             payment_date=date.today(),
             amount=Decimal('100.00'),

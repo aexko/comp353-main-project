@@ -1,5 +1,5 @@
 from django import forms
-from .models import ClubMember, Location, Personnel, FamilyMember, SecondaryFamilyMember, TeamFormation, PlayerAssignment
+from .models import ClubMember, Location, Personnel, FamilyMember, SecondaryFamilyMember, SessionTeams, PlayerAssignment
 from datetime import date
 
 
@@ -8,15 +8,15 @@ class PersonnelForm(forms.ModelForm):
         model = Personnel
         fields = '__all__'
         widgets = {
-            'date_of_birth': forms.DateInput(attrs={'type': 'date'}),
-            'email_address': forms.EmailInput(),
+            'birthdate': forms.DateInput(attrs={'type': 'date'}),
+            'email': forms.EmailInput(),
         }
 
-    def clean_date_of_birth(self):
-        date_of_birth = self.cleaned_data.get('date_of_birth')
-        if date_of_birth and date_of_birth > date.today():
+    def clean_birthdate(self):
+        birthdate = self.cleaned_data.get('birthdate')
+        if birthdate and birthdate > date.today():
             raise forms.ValidationError("Date of birth cannot be in the future")
-        return date_of_birth
+        return birthdate
 
 
 class FamilyMemberForm(forms.ModelForm):
@@ -24,15 +24,15 @@ class FamilyMemberForm(forms.ModelForm):
         model = FamilyMember
         fields = '__all__'
         widgets = {
-            'date_of_birth': forms.DateInput(attrs={'type': 'date'}),
-            'email_address': forms.EmailInput(),
+            'birthdate': forms.DateInput(attrs={'type': 'date'}),
+            'email': forms.EmailInput(),
         }
 
-    def clean_date_of_birth(self):
-        date_of_birth = self.cleaned_data.get('date_of_birth')
-        if date_of_birth and date_of_birth > date.today():
+    def clean_birthdate(self):
+        birthdate = self.cleaned_data.get('birthdate')
+        if birthdate and birthdate > date.today():
             raise forms.ValidationError("Date of birth cannot be in the future")
-        return date_of_birth
+        return birthdate
 
 
 class SecondaryFamilyMemberForm(forms.ModelForm):
@@ -44,41 +44,34 @@ class SecondaryFamilyMemberForm(forms.ModelForm):
 class ClubMemberForm(forms.ModelForm):
     class Meta:
         model = ClubMember
-        exclude = ('membership_number', 'date_joined')
+        exclude = ('member_id',)
         widgets = {
-            'date_of_birth': forms.DateInput(attrs={'type': 'date'}),
-            'email_address': forms.EmailInput(),
-            'height': forms.NumberInput(attrs={'step': '0.1'}),
-            'weight': forms.NumberInput(attrs={'step': '0.1'}),
+            'birthdate': forms.DateInput(attrs={'type': 'date'}),
+            'email': forms.EmailInput(),
+            'height': forms.NumberInput(),
+            'weight': forms.NumberInput(),
         }
 
-    def clean_date_of_birth(self):
-        date_of_birth = self.cleaned_data.get('date_of_birth')
-        if date_of_birth:
+    def clean_birthdate(self):
+        birthdate = self.cleaned_data.get('birthdate')
+        if birthdate:
             today = date.today()
-            age = today.year - date_of_birth.year - ((today.month, today.day) < (date_of_birth.month, date_of_birth.day))
+            age = today.year - birthdate.year - ((today.month, today.day) < (birthdate.month, birthdate.day))
             if age < 11:
                 raise forms.ValidationError("Club member must be at least 11 years old")
-            if date_of_birth > today:
+            if birthdate > today:
                 raise forms.ValidationError("Date of birth cannot be in the future")
-        return date_of_birth
+        return birthdate
 
 
-class TeamFormationForm(forms.ModelForm):
+class SessionTeamsForm(forms.ModelForm):
     class Meta:
-        model = TeamFormation
+        model = SessionTeams
         fields = '__all__'
         widgets = {
             'session_date': forms.DateInput(attrs={'type': 'date'}),
             'start_time': forms.TimeInput(attrs={'type': 'time'}),
         }
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # Filter head_coach to only show Personnel with Coach roles
-        self.fields['head_coach'].queryset = Personnel.objects.filter(
-            role__in=['Coach', 'Assistant Coach', 'Captain']
-        )
 
     def clean_session_date(self):
         session_date = self.cleaned_data.get('session_date')
@@ -90,9 +83,9 @@ class TeamFormationForm(forms.ModelForm):
 class PlayerAssignmentForm(forms.ModelForm):
     class Meta:
         model = PlayerAssignment
-        fields = ['club_member', 'role']
+        fields = ['member', 'position']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # Only show active club members
-        self.fields['club_member'].queryset = ClubMember.objects.filter(is_active=True)
+        self.fields['member'].queryset = ClubMember.objects.filter(activity=True)

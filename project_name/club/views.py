@@ -5,8 +5,8 @@ from django.contrib import messages
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
 
-from .forms import ClubMemberForm, PersonnelForm, FamilyMemberForm, SecondaryFamilyMemberForm, TeamFormationForm, PlayerAssignmentForm
-from .models import Location, ClubMember, Personnel, FamilyMember, SecondaryFamilyMember, TeamFormation, PlayerAssignment
+from .forms import ClubMemberForm, PersonnelForm, FamilyMemberForm, SecondaryFamilyMemberForm, SessionTeamsForm, PlayerAssignmentForm
+from .models import Location, ClubMember, Personnel, FamilyMember, SecondaryFamilyMember, SessionTeams, PlayerAssignment
 
 
 # Personnel CRUD Views
@@ -254,7 +254,7 @@ def member_list(request):
 # Team Formation Views
 def team_formation_list(request):
     """View all team formations"""
-    formations = TeamFormation.objects.all().order_by('-session_date', '-start_time')
+    formations = SessionTeams.objects.all().order_by('-session_date', '-start_time')
     context = {'formations': formations}
     return render(request, 'team_formation_list.html', context)
 
@@ -262,19 +262,19 @@ def team_formation_list(request):
 def team_formation_create(request):
     """Create a new team formation"""
     if request.method == 'POST':
-        form = TeamFormationForm(request.POST)
+        form = SessionTeamsForm(request.POST)
         if form.is_valid():
             team_formation = form.save()
             messages.success(request, 'Team formation created successfully!')
             return redirect('team_formation_detail', pk=team_formation.pk)
     else:
-        form = TeamFormationForm()
+        form = SessionTeamsForm()
     return render(request, 'team_formation_form.html', {'form': form, 'action': 'Create'})
 
 
 def team_formation_detail(request, pk):
     """View team formation details with players"""
-    formation = get_object_or_404(TeamFormation, pk=pk)
+    formation = get_object_or_404(SessionTeams, pk=pk)
     players = PlayerAssignment.objects.filter(team_formation=formation).select_related('club_member')
     context = {
         'formation': formation,
@@ -285,21 +285,21 @@ def team_formation_detail(request, pk):
 
 def team_formation_edit(request, pk):
     """Edit a team formation"""
-    formation = get_object_or_404(TeamFormation, pk=pk)
+    formation = get_object_or_404(SessionTeams, pk=pk)
     if request.method == 'POST':
-        form = TeamFormationForm(request.POST, instance=formation)
+        form = SessionTeamsForm(request.POST, instance=formation)
         if form.is_valid():
             form.save()
             messages.success(request, 'Team formation updated successfully!')
             return redirect('team_formation_detail', pk=pk)
     else:
-        form = TeamFormationForm(instance=formation)
+        form = SessionTeamsForm(instance=formation)
     return render(request, 'team_formation_form.html', {'form': form, 'action': 'Edit', 'formation': formation})
 
 
 def team_formation_delete(request, pk):
     """Delete a team formation"""
-    formation = get_object_or_404(TeamFormation, pk=pk)
+    formation = get_object_or_404(SessionTeams, pk=pk)
     if request.method == 'POST':
         formation.delete()
         messages.success(request, 'Team formation deleted successfully!')
@@ -309,7 +309,7 @@ def team_formation_delete(request, pk):
 
 def player_assignment_create(request, formation_pk):
     """Add a player to a team formation"""
-    formation = get_object_or_404(TeamFormation, pk=formation_pk)
+    formation = get_object_or_404(SessionTeams, pk=formation_pk)
     if request.method == 'POST':
         form = PlayerAssignmentForm(request.POST)
         if form.is_valid():
