@@ -2,36 +2,39 @@
 <html>
 <head>
     <title>{{ formation.team_name }} - Team Formation Details</title>
+    <!-- Add Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
-<body>
-    <h1>{{ formation.team_name }} - {% if formation.is_game %}Game{% else %}Training{% endif %}</h1>
+<body class="container mt-5">
+    <h1 class="mb-4">{{ formation.team_name }} - {% if formation.is_game %}Game{% else %}Training{% endif %}</h1>
+    <div class="card">
+        <div class="card-body">
+            <h3 class="card-title">Session Information</h3>
+            <p><strong>Date:</strong> {{ formation.session_date }}</p>
+            <p><strong>Time:</strong> {{ formation.start_time }}</p>
+            <p><strong>Location:</strong> {{ formation.location.name }}</p>
+            <p><strong>Address:</strong> {{ formation.session_address }}</p>
+            <p><strong>Head Coach:</strong> {{ formation.head_coach.first_name }} {{ formation.head_coach.last_name }}</p>
+            <p><strong>Type:</strong> {% if formation.is_game %}Game{% else %}Training Session{% endif %}</p>
 
-    <div>
-        <h3>Session Information</h3>
-        <p><strong>Date:</strong> {{ formation.session_date }}</p>
-        <p><strong>Time:</strong> {{ formation.start_time }}</p>
-        <p><strong>Location:</strong> {{ formation.location.name }}</p>
-        <p><strong>Address:</strong> {{ formation.session_address }}</p>
-        <p><strong>Head Coach:</strong> {{ formation.head_coach.first_name }} {{ formation.head_coach.last_name }}</p>
-        <p><strong>Type:</strong> {% if formation.is_game %}Game{% else %}Training Session{% endif %}</p>
-
-        {% if formation.is_game and formation.score_team1 is not None and formation.score_team2 is not None %}
-        <p><strong>Final Score:</strong> {{ formation.score_team1 }} - {{ formation.score_team2 }}</p>
-        {% endif %}
+            {% if formation.is_game and formation.score_team1 is not None and formation.score_team2 is not None %}
+            <p><strong>Final Score:</strong> {{ formation.score_team1 }} - {{ formation.score_team2 }}</p>
+            {% endif %}
+        </div>
     </div>
 
-    <div>
-        <a href="{% url 'team_formation_edit' formation.pk %}">Edit Formation</a>
-        <a href="{% url 'player_assignment_create' formation.pk %}">Add Player</a>
-        <a href="{% url 'team_formation_delete' formation.pk %}">Delete Formation</a>
-        <a href="{% url 'team_formation_list' %}">Back to List</a>
+    <div class="mt-4">
+        <a href="{% url 'team_formation_edit' formation.pk %}" class="btn btn-primary">Edit Formation</a>
+        <a href="{% url 'player_assignment_create' formation.pk %}" class="btn btn-success">Add Player</a>
+        <a href="{% url 'team_formation_delete' formation.pk %}" class="btn btn-danger">Delete Formation</a>
+        <a href="{% url 'team_formation_list' %}" class="btn btn-secondary">Back to List</a>
     </div>
 
-    <h3>Team Roster ({{ players.count }} players)</h3>
+    <h3 class="mt-5">Team Roster ({{ players.count }} players)</h3>
 
     {% if players %}
-    <table border="1">
-        <thead>
+    <table class="table table-bordered">
+        <thead class="table-light">
             <tr>
                 <th>Player Name</th>
                 <th>Role</th>
@@ -46,8 +49,8 @@
                 <td>{{ player.role }}</td>
                 <td>{{ player.club_member.membership_number }}</td>
                 <td>
-                    <a href="{% url 'club_member_detail' player.club_member.pk %}">View Member</a>
-                    <a href="{% url 'player_assignment_delete' player.pk %}">Remove</a>
+                    <a href="{% url 'club_member_detail' player.club_member.pk %}" class="btn btn-info btn-sm">View Member</a>
+                    <a href="{% url 'player_assignment_delete' player.pk %}" class="btn btn-danger btn-sm">Remove</a>
                 </td>
             </tr>
             {% endfor %}
@@ -55,7 +58,10 @@
     </table>
     {% else %}
     <p>No players assigned to this team formation yet.</p>
-    <a href="{% url 'player_assignment_create' formation.pk %}">Add First Player</a>
+    <a href="{% url 'player_assignment_create' formation.pk %}" class="btn btn-success">Add First Player</a>
     {% endif %}
+
+    <!-- Add Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

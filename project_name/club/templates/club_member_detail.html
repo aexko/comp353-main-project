@@ -3,11 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <title>Club Member Details - MVC System</title>
+    <!-- Add Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
-<body>
-    <h1>Club Member Details</h1>
+<body class="container mt-5">
+    <h1 class="mb-4">Club Member Details</h1>
 
-    <table border="1" style="border-collapse: collapse; width: 100%;">
+    <table class="table table-bordered">
         <tr><td><strong>Membership Number:</strong></td><td>{{ member.membership_number }}</td></tr>
         <tr><td><strong>Name:</strong></td><td>{{ member.first_name }} {{ member.last_name }}</td></tr>
         <tr><td><strong>Age:</strong></td><td>{{ age }} ({% if is_minor %}Minor{% else %}Major{% endif %})</td></tr>
@@ -24,17 +26,17 @@
     </table>
 
     <h3>Hobbies</h3>
-    <ul>
+    <ul class="list-group">
         {% for hobby in member.hobbies.all %}
-            <li>{{ hobby.name }}</li>
+            <li class="list-group-item">{{ hobby.name }}</li>
         {% empty %}
-            <li>No hobbies listed</li>
+            <li class="list-group-item">No hobbies listed</li>
         {% endfor %}
     </ul>
 
     <h3>Family Associations</h3>
-    <table border="1" style="width: 100%; border-collapse: collapse; margin-top: 10px;">
-        <thead>
+    <table class="table table-bordered">
+        <thead class="table-dark">
             <tr>
                 <th>Family Member</th>
                 <th>Relationship</th>
@@ -59,8 +61,8 @@
     </table>
 
     <h3>Payment History</h3>
-    <table border="1" style="width: 100%; border-collapse: collapse; margin-top: 10px;">
-        <thead>
+    <table class="table table-bordered">
+        <thead class="table-dark">
             <tr>
                 <th>Payment Date</th>
                 <th>Amount</th>
@@ -85,8 +87,8 @@
     </table>
 
     <h3>Team Assignments</h3>
-    <table border="1" style="width: 100%; border-collapse: collapse; margin-top: 10px;">
-        <thead>
+    <table class="table table-bordered">
+        <thead class="table-dark">
             <tr>
                 <th>Team</th>
                 <th>Role</th>
@@ -111,8 +113,11 @@
     </table>
 
     <br>
-    <a href="{% url 'club_member_edit' member.pk %}">Edit</a> |
-    <a href="{% url 'club_member_delete' member.pk %}" style="color: red;">Delete</a> |
-    <a href="{% url 'club_member_list' %}">Back to list</a>
+    <a href="{% url 'club_member_edit' member.pk %}" class="btn btn-primary">Edit</a>
+    <a href="{% url 'club_member_delete' member.pk %}" class="btn btn-danger">Delete</a>
+    <a href="{% url 'club_member_list' %}" class="btn btn-secondary">Back to list</a>
+
+    <!-- Add Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

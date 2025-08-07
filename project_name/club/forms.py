@@ -1,5 +1,5 @@
 from django import forms
-from .models import ClubMember, Location, Personnel, FamilyMember, SecondaryFamilyMember, TeamFormation, PlayerAssignment
+from .models import ClubMember, Location, Personnel, FamilyMember, SecondaryFamilyMember, SessionTeams, PlayerAssignment
 from datetime import date
 
 
@@ -64,9 +64,9 @@ class ClubMemberForm(forms.ModelForm):
         return date_of_birth
 
 
-class TeamFormationForm(forms.ModelForm):
+class SessionTeamsForm(forms.ModelForm):
     class Meta:
-        model = TeamFormation
+        model = SessionTeams
         fields = '__all__'
         widgets = {
             'session_date': forms.DateInput(attrs={'type': 'date'}),
@@ -77,8 +77,9 @@ class TeamFormationForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         # Filter head_coach to only show Personnel with Coach roles
         self.fields['head_coach'].queryset = Personnel.objects.filter(
-            role__in=['Coach', 'Assistant Coach', 'Captain']
-        )
+            personnelassignment__role__in=['coach', 'assistant coach', 'captain'],
+            personnelassignment__end_date__isnull=True
+        ).distinct()
 
     def clean_session_date(self):
         session_date = self.cleaned_data.get('session_date')
@@ -90,9 +91,9 @@ class TeamFormationForm(forms.ModelForm):
 class PlayerAssignmentForm(forms.ModelForm):
     class Meta:
         model = PlayerAssignment
-        fields = ['club_member', 'role']
+        fields = ['member', 'position']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # Only show active club members
-        self.fields['club_member'].queryset = ClubMember.objects.filter(is_active=True)
+        self.fields['member'].queryset = ClubMember.objects.filter(activity=True)
