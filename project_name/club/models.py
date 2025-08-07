@@ -57,9 +57,6 @@ class Hobbies(models.Model):
     def __str__(self):
         return self.name
 
-    class Meta:
-        db_table = 'hobbies'
-
 
 class EmailLog(models.Model):
     """
@@ -90,10 +87,6 @@ class EmailLog(models.Model):
     def __str__(self):
         return f"Email to {self.receiver_email} on {self.email_date}"
 
-    class Meta:
-        db_table = 'email_log'
-
-
 class Personnel(Person):
     """
     Represents a person working at a club location
@@ -112,10 +105,6 @@ class Personnel(Person):
         """Get current active location"""
         current_assignment = self.personnelassignment_set.filter(end_date__isnull=True).first()
         return current_assignment.location if current_assignment else None
-
-    class Meta:
-        db_table = 'personnel'
-
 
 class PersonnelAssignment(models.Model):
     """
@@ -146,7 +135,6 @@ class PersonnelAssignment(models.Model):
     end_date = models.DateField(null=True, blank=True, default=None)
 
     class Meta:
-        db_table = 'personnel_assignment'
         constraints = [
             models.CheckConstraint(
                 check=models.Q(end_date__isnull=True) | models.Q(end_date__gte=models.F('start_date')),
@@ -171,10 +159,6 @@ class FamilyMember(Person):
 
     def __str__(self):
         return f"Family Member {self.first_name} {self.last_name}"
-
-    class Meta:
-        db_table = 'family_member'
-
 
 class SecondaryFamilyMember(models.Model):
     """
@@ -201,10 +185,6 @@ class SecondaryFamilyMember(models.Model):
     def __str__(self):
         return f"Secondary Contact {self.first_name} {self.last_name}"
 
-    class Meta:
-        db_table = 'secondary_family_member'
-
-
 class ClubMember(Person):
     """
     Represents a club member who can be a minor or an adult
@@ -222,9 +202,6 @@ class ClubMember(Person):
     weight = models.PositiveIntegerField()
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES)
     minor = models.BooleanField(null=True, blank=True)
-
-    class Meta:
-        db_table = 'club_member'
 
     def __str__(self):
         return f"Member: {self.first_name} {self.last_name}"
@@ -256,7 +233,6 @@ class MemberHobbies(models.Model):
     hobby = models.ForeignKey(Hobbies, on_delete=models.CASCADE)
 
     class Meta:
-        db_table = 'member_hobbies'
         constraints = [
             models.UniqueConstraint(fields=['member', 'hobby'], name='unique_member_hobby')
         ]
@@ -287,7 +263,6 @@ class FamilyRelationship(models.Model):
     emergency_contact = models.BooleanField(default=True)
 
     class Meta:
-        db_table = 'family_relationship'
         constraints = [
             models.CheckConstraint(
                 check=models.Q(end_date__isnull=True) | models.Q(end_date__gte=models.F('start_date')),
@@ -330,7 +305,6 @@ class Payments(models.Model):
         return f"Payment by {self.member} for year {self.membership_year}"
 
     class Meta:
-        db_table = 'payments'
         constraints = [
             models.CheckConstraint(
                 check=models.Q(amount__gt=0),
@@ -372,10 +346,6 @@ class Sessions(models.Model):
     def __str__(self):
         return f"{self.session_type.title()} on {self.session_date} at {self.session_time}"
 
-    class Meta:
-        db_table = 'sessions'
-
-
 class SessionTeams(models.Model):
     """
     Represents teams for a specific session
@@ -395,7 +365,6 @@ class SessionTeams(models.Model):
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES)
 
     class Meta:
-        db_table = 'session_teams'
         constraints = [
             models.CheckConstraint(
                 check=models.Q(team_number__in=[1, 2]),
@@ -431,7 +400,6 @@ class PlayerAssignment(models.Model):
     is_starter = models.BooleanField(default=True)
 
     class Meta:
-        db_table = 'player_assignment'
         constraints = [
             models.UniqueConstraint(
                 fields=['team', 'member'],

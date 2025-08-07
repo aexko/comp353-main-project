@@ -160,14 +160,14 @@ def club_member_list(request):
 
 def club_member_detail(request, pk):
     member = get_object_or_404(ClubMember, pk=pk)
-    payments = member.payment_set.all().order_by('-payment_date')
-    family_associations = member.minormemberassociation_set.all()
+    payments = member.payments_set.all().order_by('-payment_date')
+    family_associations = member.familyrelationship_set.all()
     team_assignments = member.playerassignment_set.all()
 
     # Calculate age and status
     today = date.today()
-    age = today.year - member.date_of_birth.year - (
-            (today.month, today.day) < (member.date_of_birth.month, member.date_of_birth.day))
+    age = today.year - member.birthdate.year - (
+            (today.month, today.day) < (member.birthdate.month, member.birthdate.day))
     is_minor = age < 18
 
     context = {
@@ -275,7 +275,7 @@ def team_formation_create(request):
 def team_formation_detail(request, pk):
     """View team formation details with players"""
     formation = get_object_or_404(SessionTeams, pk=pk)
-    players = PlayerAssignment.objects.filter(team_formation=formation).select_related('club_member')
+    players = PlayerAssignment.objects.filter(team=formation).select_related('member')
     context = {
         'formation': formation,
         'players': players
@@ -314,9 +314,9 @@ def player_assignment_create(request, formation_pk):
         form = PlayerAssignmentForm(request.POST)
         if form.is_valid():
             assignment = form.save(commit=False)
-            assignment.team_formation = formation
+            assignment.team = formation
             assignment.save()
-            messages.success(request, f'{assignment.club_member.first_name} {assignment.club_member.last_name} added to team!')
+            messages.success(request, f'{assignment.member.first_name} {assignment.member.last_name} added to team!')
             return redirect('team_formation_detail', pk=formation_pk)
     else:
         form = PlayerAssignmentForm()
@@ -331,9 +331,9 @@ def player_assignment_create(request, formation_pk):
 def player_assignment_delete(request, pk):
     """Remove a player from a team formation"""
     assignment = get_object_or_404(PlayerAssignment, pk=pk)
-    formation_pk = assignment.team_formation.pk
+    formation_pk = assignment.team.pk
     if request.method == 'POST':
-        player_name = f'{assignment.club_member.first_name} {assignment.club_member.last_name}'
+        player_name = f'{assignment.member.first_name} {assignment.member.last_name}'
         assignment.delete()
         messages.success(request, f'{player_name} removed from team!')
         return redirect('team_formation_detail', pk=formation_pk)

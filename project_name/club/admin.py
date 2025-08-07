@@ -1,18 +1,18 @@
 from django.contrib import admin
 from .models import (
-    Location,
-    Hobbies,
-    EmailLog,
-    Personnel,
-    PersonnelAssignment,
-    FamilyMember,
-    SecondaryFamilyMember,
-    ClubMember,
+    Location, 
+    Hobbies, 
+    EmailLog, 
+    Personnel, 
+    PersonnelAssignment, 
+    FamilyMember, 
+    SecondaryFamilyMember, 
+    ClubMember, 
     MemberHobbies,
-    FamilyRelationship,
-    Payments,
+    FamilyRelationship, 
+    Payments, 
     Sessions,
-    SessionTeams,
+    SessionTeams, 
     PlayerAssignment
 )
 
