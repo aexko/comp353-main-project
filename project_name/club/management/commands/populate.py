@@ -3,7 +3,12 @@ from django.core.management.base import BaseCommand
 from datetime import date, timedelta
 from decimal import Decimal
 
-from club.models import Location
+from club.models import (
+    Location, Hobbies, Personnel, PersonnelAssignment,
+    FamilyMember, SecondaryFamilyMember, ClubMember,
+    Sessions, SessionTeams, PlayerAssignment, Payments,
+    FamilyRelationship, MemberHobbies, EmailLog
+)
 
 
 class Command(BaseCommand):

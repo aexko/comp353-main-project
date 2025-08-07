@@ -254,7 +254,7 @@ def member_list(request):
 # Team Formation Views
 def team_formation_list(request):
     """View all team formations"""
-    formations = SessionTeams.objects.all().order_by('-session_date', '-start_time')
+    formations = SessionTeams.objects.all().order_by('-session__session_date', '-session__session_time')
     context = {'formations': formations}
     return render(request, 'team_formation_list.html', context)
 

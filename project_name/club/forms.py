@@ -77,8 +77,9 @@ class SessionTeamsForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         # Filter head_coach to only show Personnel with Coach roles
         self.fields['head_coach'].queryset = Personnel.objects.filter(
-            role__in=['Coach', 'Assistant Coach', 'Captain']
-        )
+            personnelassignment__role__in=['coach', 'assistant coach', 'captain'],
+            personnelassignment__end_date__isnull=True
+        ).distinct()
 
     def clean_session_date(self):
         session_date = self.cleaned_data.get('session_date')
